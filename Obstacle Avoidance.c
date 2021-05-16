@@ -1,6 +1,7 @@
 #include<stdio.h>	//printf
 #include<string.h> //memset
 #include<stdlib.h> //exit(0);
+#include <time.h>
 #include<arpa/inet.h>
 #include<sys/socket.h>
 #include <unistd.h>
@@ -25,6 +26,10 @@ int fd;
 #define IN3 2  //right motor IN3 connect to wPi pin# 2 (Physical 13,BCM GPIO 27)
 #define IN4 3  //right motor IN4 connect to wPi pin# 3 (Physical 15,BCM GPIO 22)
 
+#define GPIO_TRIGGER 20
+#define GPIO_ECHO 21
+
+/*IF THIS IS FOR THE LINE TRACKING THEN THIS CODE IS NOT NECESSARY
 //define IR tracking sensor wPi pin#
 #define sensor1 21 // No.1 sensor from far left to wPi#21 Physical pin#29
 #define sensor2 22 // No.2 sensor from left to wPi#22 Physical pin#31
@@ -32,6 +37,7 @@ int fd;
 #define sensor4 24 // No.2 sensor from right to wPi#24 Physical pin#35
 #define sensor5 25 // No.1 sensor from far  right to wPi#25 Physical pin#37
 char val[5]; //sensor value array
+*/
 
 #define high_speed 3000  // Max pulse length out of 4096
 #define mid_speed  2000  // Max pulse length out of 4096
@@ -89,6 +95,30 @@ void go_Right(int fd,int l_speed,int r_speed){
     pca9685PWMWrite(fd, ENA, 0, l_speed);
     pca9685PWMWrite(fd, ENB, 0, r_speed);
 }
+
+double measure(){
+	double start = 0, stop = 0, elapsed = 0, distance = 0;
+	
+	digitalWrite(GPIO_TRIGGER, true);
+	digitalWrite(GPIO_TRIGGER, false);
+	start = clock();
+	
+	while (digitalRead(GPIO_ECHO) == 0)
+	{
+		start = clock();
+	}
+	
+	while (digitalRead(GPIO_ECHO) == 1)
+	{
+		stop = clock();
+	}
+	
+	elapsed = stop - start;
+	distance = (elapsed * 34300) / 2;
+	
+	return distance;
+}
+
 void stop_car(int fd){
     digitalWrite(IN1,LOW);
     digitalWrite(IN2,LOW);
