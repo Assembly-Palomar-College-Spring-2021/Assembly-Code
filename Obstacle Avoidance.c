@@ -48,9 +48,12 @@ char val[5]; //sensor value array
 #define high_speed 3000  // Max pulse length out of 4096
 #define mid_speed  2000  // Max pulse length out of 4096
 #define low_speed  1350  // Max pulse length out of 4096
-#define short_delay 100
-#define long_delay 200
-#define extra_long_delay 300
+#define high_speed_2 4000  // Max pulse length out of 4096
+#define mid_speed_2  2500  // Max pulse length out of 4096
+#define low_speed_2  2000  // Max pulse length out of 4096
+#define short_delay 200
+#define long_delay 250
+#define extra_long_delay 600
 
 void setup(){
  pinMode(IN1,OUTPUT);
@@ -126,6 +129,18 @@ double measure(){
 	distance = (elapsed * 34300) / 2;
 	
 	return distance;
+}
+
+// Function to halt program execution for a given number of milliseconds
+void delay(int milliseconds)
+{
+    long pause;
+    clock_t now,then;
+
+    pause = milliseconds*(CLOCKS_PER_SEC/1000);
+    now = then = clock();
+    while( (now-then) < pause )
+        now = clock();
 }
 
 void stop_car(int fd){
@@ -253,6 +268,82 @@ int main(void)
 			die("sendto()");
 		}
         */
+		
+		//if (OBSTACLE AVOIDANCE BUTTON TOGGLED){
+		int sts1 = 0, sts2 = 0, sts3 = 0, ob_range = 30;
+		
+		//SET SERVO LEFT
+		delay(300);
+		distance = measure();
+		if (distance > ob_range) { sts1 = 0; }
+		else {sts1 = 1; }
+		
+		//SET SERVO CENTER
+		delay(300);
+		distance = measure();
+		if (distance > ob_range) { sts2 = 0; }
+		else {sts2 = 1; }
+		
+		//SET SERVO RIGHT
+		delay(300);
+		distance = measure();
+		if (distance > ob_range) { sts3 = 0; }
+		else {sts3 = 1; }
+		
+		if (sts1 == 1 && sts2 == 0 && sts3 == 0)
+		{
+			printf("100 slight right");
+			go_Advance(fd, high_speed_2, 0);
+			delay(long_delay);
+			stop_car();
+			delay(short_delay);
+		}
+		
+		if (sts1 = 0 && sts2 == 0 && sts3 == 1)
+		{
+			printf("001 slight left");
+			go_Advance(fd, 0, high_speed_2);
+			delay(long_delay);
+			stop_car();
+			delay(short_delay);
+		}
+		
+		if (sts1 == 1 && sts2 == 1 && sts3 == 0)
+		{
+			printf("110 sharp right");
+			go_Right(fd, high_speed_2, low_speed_2);
+			delay(long_delay);
+			stop_car();
+			delay(short_delay);
+		}
+		
+		if ((sts1 == 0 && sts2 == 1 && sts3 == 1) || (sts1 == 0 && sts2 == 1 && sts3 == 0))
+		{
+			printf("%d%d%d sharp left", sts1, sts2, sts3);
+			go_Left(fd, low_speed_2, high_speed_2);
+			delay(long_delay);
+			stop_car();
+			delay(short_delay);
+		}
+		
+		if ((sts1 == 1 && sts2 == 1 && sts3 == 1) || (sts1 == 1 & sts2 == 0 && sts3 == 1))
+		{
+			printf("%d%d%d back to left", sts1, sts2, sts3);
+			go_Right(fd, high_speed_2, high_speed_2);
+			delay(long_delay);
+			stop_car();
+			delay(short_delay);
+		}
+		
+		if (sts1 == 0 && sts2 == 0 && sts3 == 0)
+		{
+			printf("000 forward");
+			go_Advance(fd, mid_speed_2, mid_speed_2);
+			delay(long_delay);
+			stop_car();
+			delay(short_delay);
+		}
+		//}
 	}
 
 	close(s);
