@@ -26,8 +26,14 @@ int fd;
 #define IN3 2  //right motor IN3 connect to wPi pin# 2 (Physical 13,BCM GPIO 27)
 #define IN4 3  //right motor IN4 connect to wPi pin# 3 (Physical 15,BCM GPIO 22)
 
+// Define GPIO to use on Pi
 #define GPIO_TRIGGER 20
 #define GPIO_ECHO 21
+
+// Ultrasonic sensor facings
+#define servo_left 420
+#define servo_center 300
+#define servo_right 180
 
 /*IF THIS IS FOR THE LINE TRACKING THEN THIS CODE IS NOT NECESSARY
 //define IR tracking sensor wPi pin#
@@ -51,12 +57,15 @@ void setup(){
  pinMode(IN2,OUTPUT);
  pinMode(IN3,OUTPUT);
  pinMode(IN4,OUTPUT);
+ pinMode(GPIO_TRIGGER, OUTPUT);
+ pinMode(GPIO_ECHO, INPUT);
+/* BELIEVE THIS IS FOR THE LINE TRACKER AND THEREFORE UNNECESSARY
  pinMode(sensor1,INPUT);
  pinMode(sensor2,INPUT);
  pinMode(sensor3,INPUT);
  pinMode(sensor4,INPUT);
  pinMode(sensor5,INPUT);
-  
+*/  
  
  digitalWrite(IN1,LOW);
  digitalWrite(IN2,LOW);
